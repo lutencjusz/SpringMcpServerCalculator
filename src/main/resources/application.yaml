@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: mcp-server
+
+server:
+  port: 8080
+
+logging:
+  level:
+    com:
+      example:
+        mcpserver: DEBUG
