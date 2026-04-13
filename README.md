@@ -38,6 +38,11 @@ Set-Location "C:\Data\Java\SpringMcpServer"
 
 By default, the server starts on port `8080` (see `src/main/resources/application.yaml`).
 
+## Run MCP Server with proxy for GitHub Copilot CLI
+```powershell
+Set-Location "C:\Data\Java\SpringMcpServer"
+.\START.CMD
+```
 ## Build and Test
 
 ```powershell
