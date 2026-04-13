@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "spring-mcp-server": {
+      "command": "node",
+      "args": [
+        "C:\\Users\\micha\\.copilot\\mcp-spring-proxy.js"
+      ],
+      "disabled": false,
+      "alwaysAllow": [
+        "tools/list",
+        "tools/call"
+      ]
+    }
+  },
+  "description": "Spring MCP Server Calculator - JSON-RPC server running at localhost:8080"
+}
+
