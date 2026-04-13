@@ -1,35 +1,35 @@
-#!/usr/bin/env pwsh
 <#
 .SYNOPSIS
-    Setup script for GitHub Copilot CLI integration with Spring MCP Server
+    Setup script for GitHub Copilot CLI integration with Spring MCP Server.
 
 .DESCRIPTION
-    This script copies necessary configuration files to ~/.copilot/ directory
-    for GitHub Copilot CLI integration.
+    Copies MCP configuration files to the user's global Copilot directory.
 
 .EXAMPLE
-    .\setup-github-copilot-cli.ps1
+    .\setup-github-copilot-cli.ps1 -Force
 #>
 
 param(
     [switch]$Force
 )
 
-# Colors for output
 $Green = [System.ConsoleColor]::Green
 $Yellow = [System.ConsoleColor]::Yellow
 $Red = [System.ConsoleColor]::Red
 
-function Write-Success {
-    Write-Host $args[0] -ForegroundColor $Green
+function Write-SuccessMessage {
+    param([string]$Message)
+    Write-Host $Message -ForegroundColor $Green
 }
 
-function Write-Warning {
-    Write-Host $args[0] -ForegroundColor $Yellow
+function Write-WarningMessage {
+    param([string]$Message)
+    Write-Host $Message -ForegroundColor $Yellow
 }
 
-function Write-Error {
-    Write-Host $args[0] -ForegroundColor $Red
+function Write-ErrorMessage {
+    param([string]$Message)
+    Write-Host $Message -ForegroundColor $Red
 }
 
 Write-Host "================================"
@@ -37,42 +37,35 @@ Write-Host "GitHub Copilot CLI Setup Script"
 Write-Host "================================"
 Write-Host ""
 
-# Check if Node.js is installed
 Write-Host "Checking prerequisites..."
 try {
     $nodeVersion = node --version
-    Write-Success "✓ Node.js is installed: $nodeVersion"
-} catch {
-    Write-Error "✗ Node.js is not installed or not in PATH"
-    Write-Host "  Please install Node.js from: https://nodejs.org/"
+    Write-SuccessMessage ("[OK] Node.js is installed: {0}" -f $nodeVersion)
+}
+catch {
+    Write-ErrorMessage "[ERROR] Node.js is not installed or not in PATH."
+    Write-Host "Please install Node.js from https://nodejs.org/ and run again."
     exit 1
 }
 
-# Create .copilot directory
-$mcpConfigDir = "$env:USERPROFILE\.copilot"
-Write-Host "Creating/verifying .copilot directory: $mcpConfigDir"
+$mcpConfigDir = Join-Path $env:USERPROFILE ".copilot"
+Write-Host ("Creating/verifying Copilot directory: {0}" -f $mcpConfigDir)
 
-if (-not (Test-Path $mcpConfigDir)) {
-    New-Item -ItemType Directory -Path $mcpConfigDir -Force > $null
-    Write-Success "✓ Created .copilot directory"
-} else {
-    Write-Success "✓ .copilot directory already exists"
+if (-not (Test-Path -Path $mcpConfigDir)) {
+    New-Item -ItemType Directory -Path $mcpConfigDir -Force | Out-Null
+    Write-SuccessMessage "[OK] Created .copilot directory"
+}
+else {
+    Write-SuccessMessage "[OK] .copilot directory already exists"
 }
 
-# Get the script directory (where this setup script is located)
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-
-# Check for required files in the project
-$requiredFiles = @(
-    "mcp-config.json",
-    "mcp-spring-proxy.js"
-)
+$requiredFiles = @("mcp-config.json", "mcp-spring-proxy.js")
 
 foreach ($file in $requiredFiles) {
     $sourcePath = Join-Path $scriptDir $file
-    if (-not (Test-Path $sourcePath)) {
-        Write-Error "✗ Required file not found: $file"
-        Write-Host "  Looking in: $sourcePath"
+    if (-not (Test-Path -Path $sourcePath)) {
+        Write-ErrorMessage ("[ERROR] Required file not found: {0}" -f $sourcePath)
         exit 1
     }
 }
@@ -80,62 +73,59 @@ foreach ($file in $requiredFiles) {
 Write-Host ""
 Write-Host "Installing MCP configuration files..."
 
-# Copy mcp-config.json
 $configSource = Join-Path $scriptDir "mcp-config.json"
 $configDest = Join-Path $mcpConfigDir "mcp-config.json"
 
-if ((Test-Path $configDest) -and -not $Force) {
-    Write-Warning "⚠ $configDest already exists"
+if ((Test-Path -Path $configDest) -and (-not $Force)) {
+    Write-WarningMessage ("[WARN] {0} already exists" -f $configDest)
     $response = Read-Host "Overwrite? (y/n)"
-    if ($response -ne "y") {
-        Write-Host "Skipping..."
-    } else {
-        Copy-Item $configSource $configDest -Force
-        Write-Success "✓ Updated mcp-config.json"
+    if ($response -eq "y") {
+        Copy-Item -Path $configSource -Destination $configDest -Force
+        Write-SuccessMessage "[OK] Updated mcp-config.json"
     }
-} else {
-    Copy-Item $configSource $configDest -Force
-    Write-Success "✓ Installed mcp-config.json"
+    else {
+        Write-Host "Skipped mcp-config.json"
+    }
+}
+else {
+    Copy-Item -Path $configSource -Destination $configDest -Force
+    Write-SuccessMessage "[OK] Installed mcp-config.json"
 }
 
-# Copy mcp-spring-proxy.js
 $proxySource = Join-Path $scriptDir "mcp-spring-proxy.js"
 $proxyDest = Join-Path $mcpConfigDir "mcp-spring-proxy.js"
 
-if ((Test-Path $proxyDest) -and -not $Force) {
-    Write-Warning "⚠ $proxyDest already exists"
+if ((Test-Path -Path $proxyDest) -and (-not $Force)) {
+    Write-WarningMessage ("[WARN] {0} already exists" -f $proxyDest)
     $response = Read-Host "Overwrite? (y/n)"
-    if ($response -ne "y") {
-        Write-Host "Skipping..."
-    } else {
-        Copy-Item $proxySource $proxyDest -Force
-        Write-Success "✓ Updated mcp-spring-proxy.js"
+    if ($response -eq "y") {
+        Copy-Item -Path $proxySource -Destination $proxyDest -Force
+        Write-SuccessMessage "[OK] Updated mcp-spring-proxy.js"
     }
-} else {
-    Copy-Item $proxySource $proxyDest -Force
-    Write-Success "✓ Installed mcp-spring-proxy.js"
+    else {
+        Write-Host "Skipped mcp-spring-proxy.js"
+    }
+}
+else {
+    Copy-Item -Path $proxySource -Destination $proxyDest -Force
+    Write-SuccessMessage "[OK] Installed mcp-spring-proxy.js"
 }
 
 Write-Host ""
-Write-Success "✅ Setup complete!"
+Write-SuccessMessage "[OK] Setup complete"
 Write-Host ""
 Write-Host "Next steps:"
-Write-Host "1. Start the Spring MCP Server in one terminal:"
-Write-Host "   cd '$scriptDir'"
+Write-Host "1) Start Spring MCP server:"
+Write-Host ("   cd '{0}'" -f $scriptDir)
 Write-Host "   .\mvnw.cmd spring-boot:run"
 Write-Host ""
-Write-Host "2. In another terminal, verify the setup:"
-Write-Host "   `$body = @{'jsonrpc'='2.0';'method'='tools/list';'params'=@{};'id'='1'} | ConvertTo-Json"
+Write-Host "2) Verify endpoint manually:"
+Write-Host "   `$body = '{""jsonrpc"":""2.0"",""method"":""tools/list"",""params"":{},""id"":""1""}'"
 Write-Host "   Invoke-RestMethod -Uri 'http://localhost:8080/mcp' -Method POST -ContentType 'application/json' -Body `$body"
 Write-Host ""
-Write-Host "3. Configuration files are installed at:"
-Write-Host "   $mcpConfigDir"
+Write-Host "Configuration path:"
+Write-Host ("   {0}" -f $mcpConfigDir)
 Write-Host ""
-Write-Host "For more information, see SETUP.md"
-Write-Host ""
-Write-Host "⚠️  Remember:"
-Write-Host "  - Keep the Spring MCP Server running"
-Write-Host "  - The configuration is now available in all projects"
-Write-Host "  - GitHub Copilot CLI will auto-discover the spring-mcp-server"
+Write-Host "For details see SETUP.md"
 
 
