@@ -187,3 +187,54 @@ Invoke-RestMethod -Uri "http://localhost:8080/mcp" -Method POST -ContentType "ap
 - `src/main/java/com/example/mcpserver/tools/CalculatorTool.java` - sample calculator tool
 - `src/main/resources/application.yaml` - app configuration
 
+## GitHub Copilot CLI Integration
+
+To use this MCP server with GitHub Copilot CLI globally across all projects:
+
+### Prerequisites
+
+- GitHub Copilot CLI installed
+- Node.js installed
+- This Spring Boot server running on `localhost:8080`
+
+### Setup Steps
+
+1. **Start the Spring Boot MCP server** in one terminal:
+
+```powershell
+cd C:\Data\Java\SpringMcpServer
+.\mvnw.cmd spring-boot:run
+```
+
+2. **Configure GitHub Copilot CLI** to use this server:
+
+The configuration files are automatically set up at `~/.copilot/`:
+
+- `mcp-config.json` - Configuration for MCP servers
+- `mcp-spring-proxy.js` - STDIO proxy that converts requests to HTTP calls
+
+3. **Verify the integration**:
+
+Once the server is running and configured, you can use it in any project with GitHub Copilot CLI. The calculator tool will be available globally.
+
+### Configuration Details
+
+The MCP server is configured to:
+- Run on `localhost:8080`
+- Support `tools/list` and `tools/call` methods
+- Provide a calculator tool for summing numbers
+
+### How It Works
+
+1. GitHub Copilot CLI connects to the local MCP server via a Node.js proxy
+2. The proxy converts STDIO JSON-RPC messages to HTTP POST requests
+3. Requests are sent to `http://localhost:8080/mcp`
+4. Responses are converted back to STDIO for GitHub Copilot CLI
+
+### Usage Example
+
+Once configured, you can use the calculator tool in any GitHub Copilot CLI session:
+
+```
+copilot_something_that_uses_calculator_tool
+```
